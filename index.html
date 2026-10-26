@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lenskart Home – phone preview</title>
+<style>
+  :root {
+    --stage: #e9e7e3;
+    --stage-text: #6b6b6b;
+    --bezel: #111214;
+    --bezel-edge: #2b2d31;
+    --screen: #ffffff;
+    --ink: #000000;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --stage: #17181a; --stage-text: #8a8a8a; }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--stage);
+    color: var(--stage-text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Wrapper takes the *scaled* size so flex centring stays exact. */
+  #fit { position: relative; flex: none; }
+
+  #device {
+    position: absolute; top: 0; left: 0;
+    transform-origin: top left;
+    width: 414px;                 /* 390 screen + 2 x 12 bezel */
+    padding: 12px;
+    background: var(--bezel);
+    border-radius: 58px;
+    box-shadow:
+      0 0 0 2px var(--bezel-edge),
+      0 0 0 3px #000,
+      0 40px 80px -20px rgba(0, 0, 0, .45),
+      0 20px 40px -20px rgba(0, 0, 0, .35);
+  }
+  /* side buttons */
+  #device::before, #device::after {
+    content: ""; position: absolute; width: 4px; background: var(--bezel-edge);
+    border-radius: 2px;
+  }
+  #device::before { left: -6px; top: 140px; height: 56px; box-shadow: 0 76px 0 var(--bezel-edge); }
+  #device::after  { right: -6px; top: 190px; height: 90px; }
+
+  #screen {
+    width: 390px;
+    background: var(--screen);
+    border-radius: 46px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* status bar (sits above the design so the artboard stays pixel-true) */
+  #status {
+    height: 44px; padding: 0 30px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--screen); color: var(--ink);
+    font-size: 15px; font-weight: 600; letter-spacing: .01em;
+    position: relative;
+  }
+  #island {
+    position: absolute; left: 50%; top: 9px; transform: translateX(-50%);
+    width: 112px; height: 30px; border-radius: 20px; background: #000;
+  }
+  #status .icons { display: flex; align-items: center; gap: 6px; }
+
+  #frame {
+    display: block; width: 390px; height: 844px; border: 0;
+    background: var(--screen);
+  }
+
+  #home {
+    height: 22px; background: var(--screen);
+    display: flex; align-items: flex-start; justify-content: center;
+  }
+  #home i {
+    display: block; width: 134px; height: 5px; border-radius: 3px;
+    background: #000; margin-top: 7px;
+  }
+
+  /* Real phone / narrow window: drop the mockup, show the design full-bleed. */
+  body.bare #device {
+    padding: 0; background: none; border-radius: 0; box-shadow: none; width: 390px;
+  }
+  body.bare #device::before, body.bare #device::after,
+  body.bare #status, body.bare #home { display: none; }
+  body.bare #screen { border-radius: 0; }
+</style>
+</head>
+<body>
+  <div id="fit">
+    <div id="device">
+      <div id="screen">
+        <div id="status" aria-hidden="true">
+          <span>9:41</span>
+          <span id="island"></span>
+          <span class="icons">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="#000"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round"><path d="M1.5 4.3a9.6 9.6 0 0 1 13 0"/><path d="M4 7a6 6 0 0 1 8 0"/><circle cx="8" cy="10" r="1" fill="#000" stroke="none"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="#000" opacity=".4"/><rect x="2" y="2" width="19" height="8" rx="2.2" fill="#000"/><rect x="24" y="4" width="1.6" height="4" rx=".8" fill="#000" opacity=".4"/></svg>
+          </span>
+        </div>
+
+        <iframe id="frame" src="Main.dc.html" title="Lenskart Home design" loading="eager"></iframe>
+
+        <div id="home" aria-hidden="true"><i></i></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  (function () {
+    var body = document.body;
+    var fit = document.getElementById('fit');
+    var device = document.getElementById('device');
+
+    function layout() {
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var bare = vw <= 520;                 // phone-sized window: no mockup
+      body.classList.toggle('bare', bare);
+
+      var w = device.offsetWidth, h = device.offsetHeight;
+      var margin = bare ? 0 : 32;
+      var cap = bare ? 1.2 : 1;
+      var s = Math.min(cap, (vw - margin) / w, (vh - margin) / h);
+      if (!(s > 0)) s = 1;
+
+      device.style.transform = 'scale(' + s + ')';
+      fit.style.width = Math.round(w * s) + 'px';
+      fit.style.height = Math.round(h * s) + 'px';
+    }
+
+    window.addEventListener('resize', layout);
+    window.addEventListener('orientationchange', layout);
+    layout();
+  })();
+</script>
+</body>
+</html>
